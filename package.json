@@ -1,0 +1,51 @@
+{
+  "name": "glimmer-build",
+  "version": "0.0.1",
+  "description": "Build tooling for Glimmer packages.",
+  "main": "index.js",
+  "contributors": [
+    "Dan Gebhardt <dan@cerebris.com>",
+    "Tom Dale <tom@tomdale.net>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@types/qunit": "^1.16.30",
+    "amd-name-resolver": "0.0.6",
+    "babel-plugin-check-es2015-constants": "^6.8.0",
+    "babel-plugin-external-helpers-2": "^6.3.13",
+    "babel-plugin-feature-flags": "^0.3.0",
+    "babel-plugin-filter-imports": "~0.3.0",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.8.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.14.0",
+    "babel-plugin-transform-es2015-classes": "^6.14.0",
+    "babel-plugin-transform-es2015-computed-properties": "^6.8.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
+    "babel-plugin-transform-es2015-modules-amd": "^6.8.0",
+    "babel-plugin-transform-es2015-parameters": "^6.11.4",
+    "babel-plugin-transform-es2015-shorthand-properties": "^6.8.0",
+    "babel-plugin-transform-es2015-spread": "^6.8.0",
+    "babel-plugin-transform-es2015-template-literals": "^6.8.0",
+    "babel-plugin-transform-proto-to-assign": "^6.9.0",
+    "broccoli": "^0.16.9",
+    "broccoli-babel-transpiler": "^6.0.0-alpha.1",
+    "broccoli-concat": "^3.0.5",
+    "broccoli-funnel": "^1.0.7",
+    "broccoli-merge-trees": "^1.1.4",
+    "broccoli-rollup": "^1.0.3",
+    "broccoli-string-replace": "^0.1.1",
+    "broccoli-typescript-compiler": "^1.0.1",
+    "loader.js": "^4.0.11",
+    "qunitjs": "^2.0.1",
+    "testem": "^1.13.0",
+    "tslint": "^3.15.1",
+    "typescript": "2.0.10"
+  },
+  "devDependencies": {
+    "amd-name-resolver": "0.0.6",
+    "babel-generator": "^6.19.0",
+    "babel-helpers": "^6.16.0",
+    "babel-types": "^6.19.0",
+    "broccoli-babel-transpiler": "^6.0.0-alpha.2",
+    "broccoli-funnel": "^1.1.0"
+  }
+}
