@@ -37,43 +37,38 @@ module.exports = function(options) {
 
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
-      destDir: '',
       annotation: 'loader.js'
     }));
 
     trees.push(funnelLib('qunitjs', {
       include: ['qunit.js', 'qunit.css'],
-      destDir: '',
       annotation: 'test/qunit.{js|css}'
     }));
 
-    trees.push(funnel('../../test-support', {
-      include: ['*.js', '*.html'],
-      destDir: '',
-      annotation: 'test-support'
-    }));
-
-    trees.push(concat('../../', {
-      inputFiles: [
-        'node_modules/glimmer-engine/dist/amd/glimmer-common.amd.js',
-        'node_modules/glimmer-engine/dist/amd/glimmer-compiler.amd.js',
-        'node_modules/glimmer-engine/dist/amd/glimmer-runtime.amd.js'
+    trees.push(funnel('./node_modules/glimmer-build/test-support', {
+      include: [
+        'test-loader.js',
+        'index.html'
       ],
-      outputFile: 'vendor.js'
+      annotation: 'test-support'
     }));
 
     let babelHelpers = writeFile('babel-helpers.js', helpers('amd'));
     trees.push(babelHelpers);
 
-    let testDependencies = options.testDependencies;
-    if (testDependencies) {
-      trees.push(concat('./', {
-        inputFiles: testDependencies,
-        outputFile: 'test-dependencies.js'
-      }));
-    } else {
-      trees.push(writeFile('test-dependencies.js', ''));
-    }
+    let vendorFiles = [
+      'node_modules/glimmer-build/test-support/loader-no-conflict.js'
+    ];
+
+    if (options.testDependencies) {
+      Array.prototype.push.apply(vendorFiles, options.testDependencies);
+    };
+
+    trees.push(concat('./', {
+      inputFiles: vendorFiles,
+      outputFile: 'vendor.js',
+      annotation: 'vendor.js'
+    }));
 
     trees.push(compileTS('tsconfig.tests.json', projectPath, tsinclude));
 
