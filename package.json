@@ -1,5 +1,5 @@
 {
-  "name": "glimmer-build",
+  "name": "@glimmer/build",
   "version": "0.1.4",
   "description": "Build tooling for Glimmer packages.",
   "main": "index.js",
