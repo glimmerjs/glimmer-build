@@ -45,7 +45,7 @@ module.exports = function(options) {
       annotation: 'test/qunit.{js|css}'
     }));
 
-    trees.push(funnel('./node_modules/glimmer-build/test-support', {
+    trees.push(funnel('./node_modules/@glimmer/build/test-support', {
       include: [
         'test-loader.js',
         'index.html'
@@ -57,7 +57,7 @@ module.exports = function(options) {
     trees.push(babelHelpers);
 
     let vendorFiles = [
-      'node_modules/glimmer-build/test-support/loader-no-conflict.js'
+      'node_modules/@glimmer/build/test-support/loader-no-conflict.js'
     ];
 
     if (options.testDependencies) {
