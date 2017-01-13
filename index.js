@@ -10,7 +10,8 @@ const replace = require('broccoli-string-replace');
 const writeFile = require('broccoli-file-creator');
 const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
-const toNamedAMD = require('./lib/to-named-amd');
+const toNamedAmd = require('./lib/to-named-amd');
+const toNamedCommonJs = require('./lib/to-named-common-js');
 const toES5 = require('./lib/to-es5');
 const helpers = require('./lib/generate-helpers');
 
@@ -71,24 +72,34 @@ module.exports = function(options) {
     }));
 
     trees.push(compileTS('tsconfig.tests.json', projectPath, tsinclude));
-
   } else {
-    let es2015 = compileTS('tsconfig.json', projectPath, tsinclude);
-    trees.push(es2015);
+    let es2017Modules = compileTS('tsconfig.json', projectPath, tsinclude);
+    let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
+    let es5Amd = toNamedAmd(es5Modules);
+    let es2017CommonJs = toNamedCommonJs(es2017Modules);
+    let es5CommonJs = toNamedCommonJs(es5Modules);
 
-    let es5 = toES5(es2015, {
-      sourceMap: 'inline'
-    });
-
-    let namedAMD = toNamedAMD(es5);
-    trees.push(namedAMD);
-
-    let amd = concat(namedAMD, {
-      inputFiles: ['**/*.js'],
-      outputFile: 'amd/' + projectName + '.js'
-    });
-
-    trees.push(amd);
+    trees.push(funnel(es2017Modules, {
+      destDir: 'modules/es2017',
+      annotation: 'modules-es2017'
+    }));
+    trees.push(funnel(es5Modules, {
+      destDir: 'modules/es5',
+      annotation: 'modules-es5'
+    }));
+    trees.push(funnel(es5Amd, {
+      srcDir: projectName,
+      destDir: 'amd/es5',
+      annotation: 'amd-es5'
+    }));
+    trees.push(funnel(es2017CommonJs, {
+      destDir: 'commonjs/es2017',
+      annotation: 'commonjs-es2017'
+    }));
+    trees.push(funnel(es5CommonJs, {
+      destDir: 'commonjs/es5',
+      annotation: 'commonjs-es5'
+    }));
   }
 
   return mergeTrees(trees);
@@ -97,23 +108,46 @@ module.exports = function(options) {
 function compileTS(tsconfigFile, projectPath, tsinclude) {
   let tsconfig = JSON.parse(fs.readFileSync(tsconfigFile));
 
-  if (tsconfig.compilerOptions.outFile) {
-    tsconfig.compilerOptions.outFile = removeFirstPathSegment(tsconfig.compilerOptions.outFile);
-  }
-
-  if (tsconfig.compilerOptions.outDir) {
-    tsconfig.compilerOptions.outDir = removeFirstPathSegment(tsconfig.compilerOptions.outDir);
-  }
+  tsconfig.compilerOptions = mungeCompilerOptions(tsconfig.compilerOptions);
 
   let ts = funnel(projectPath, {
     include: tsinclude,
     annotation: 'raw source'
   });
 
-  return typescript(ts, {
+  let compiledTS = typescript(ts, {
     tsconfig,
     annotation: 'compiled source'
   });
+
+  return filterTypescriptFromTree(compiledTS);
+}
+
+function mungeCompilerOptions(compilerOptions) {
+  let optionDefaults = {
+    lib: []
+  };
+  let optionOverrides = {
+    target: 'es2017',
+    module: 'es2015',
+    outDir: 'dist'
+  };
+
+  compilerOptions = Object.assign({}, optionDefaults, compilerOptions, optionOverrides);
+
+  if (compilerOptions.outFile) {
+    compilerOptions.outFile = removeFirstPathSegment(compilerOptions.outFile);
+  }
+
+  if (compilerOptions.outDir) {
+    compilerOptions.outDir = removeFirstPathSegment(compilerOptions.outDir);
+  }
+
+  return compilerOptions;
+}
+
+function filterTypescriptFromTree(tree) {
+  return funnel(tree, { exclude: ['**/*.ts'] });
 }
 
 function removeFirstPathSegment(path) {
