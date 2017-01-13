@@ -5,7 +5,8 @@
   "main": "index.js",
   "contributors": [
     "Dan Gebhardt <dan@cerebris.com>",
-    "Tom Dale <tom@tomdale.net>"
+    "Tom Dale <tom@tomdale.net>",
+    "Kris Selden <kris.selden@gmail.com>"
   ],
   "license": "MIT",
   "dependencies": {
