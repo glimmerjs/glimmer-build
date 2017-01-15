@@ -29,7 +29,8 @@ module.exports = function(options) {
   let trees = [];
 
   let tsinclude = [
-    'src/**'
+    'src/**',
+    'lib.*.d.ts'
   ];
 
   if (env === 'tests') {
@@ -108,9 +109,20 @@ module.exports = function(options) {
 function compileTS(tsconfigFile, projectPath, tsinclude) {
   let tsconfig = JSON.parse(fs.readFileSync(tsconfigFile));
 
-  tsconfig.compilerOptions = mungeCompilerOptions(tsconfig.compilerOptions);
+  if (tsconfig.compilerOptions.outFile) {
+    tsconfig.compilerOptions.outFile = removeFirstPathSegment(tsconfig.compilerOptions.outFile);
+  }
 
-  let ts = funnel(projectPath, {
+  if (tsconfig.compilerOptions.outDir) {
+    tsconfig.compilerOptions.outDir = removeFirstPathSegment(tsconfig.compilerOptions.outDir);
+  }
+
+  let libs = funnel('./', {
+    srcDir: 'node_modules/typescript/lib',
+    include: ['lib.*.d.ts']
+  });
+
+  let ts = funnel(mergeTrees([libs, projectPath]), {
     include: tsinclude,
     annotation: 'raw source'
   });
@@ -121,29 +133,6 @@ function compileTS(tsconfigFile, projectPath, tsinclude) {
   });
 
   return filterTypescriptFromTree(compiledTS);
-}
-
-function mungeCompilerOptions(compilerOptions) {
-  let optionDefaults = {
-    lib: []
-  };
-  let optionOverrides = {
-    target: 'es2017',
-    module: 'es2015',
-    outDir: 'dist'
-  };
-
-  compilerOptions = Object.assign({}, optionDefaults, compilerOptions, optionOverrides);
-
-  if (compilerOptions.outFile) {
-    compilerOptions.outFile = removeFirstPathSegment(compilerOptions.outFile);
-  }
-
-  if (compilerOptions.outDir) {
-    compilerOptions.outDir = removeFirstPathSegment(compilerOptions.outDir);
-  }
-
-  return compilerOptions;
 }
 
 function filterTypescriptFromTree(tree) {
