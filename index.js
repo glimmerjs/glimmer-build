@@ -8,6 +8,7 @@ const concat = require('broccoli-concat');
 const fs = require('fs');
 const replace = require('broccoli-string-replace');
 const writeFile = require('broccoli-file-creator');
+const findLib = require('./lib/find-lib');
 const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
 const toNamedAmd = require('./lib/to-named-amd');
@@ -117,8 +118,7 @@ function compileTS(tsconfigFile, projectPath, tsinclude) {
     tsconfig.compilerOptions.outDir = removeFirstPathSegment(tsconfig.compilerOptions.outDir);
   }
 
-  let libs = funnel('./', {
-    srcDir: 'node_modules/typescript/lib',
+  let libs = funnel(findLib('typescript'), {
     include: ['lib.*.d.ts']
   });
 
