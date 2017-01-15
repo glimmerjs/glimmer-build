@@ -36,7 +36,7 @@ module.exports = function(options) {
 
   if (env === 'tests') {
     tsinclude.push('test/**');
-    tsinclude.push('node_modules/@types/**');
+    tsinclude.push('node_modules/@types/**/*.ts');
 
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
@@ -75,17 +75,17 @@ module.exports = function(options) {
 
     trees.push(compileTS('tsconfig.tests.json', projectPath, tsinclude));
   } else {
-    let es2017ModulesAndTypings = compileTS('tsconfig.json', projectPath, tsinclude);
-    let typings = selectTypingsFromTree(es2017ModulesAndTypings);
-    let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypings);
+    let es2017ModulesAndTypes = compileTS('tsconfig.json', projectPath, tsinclude);
+    let types = selectTypesFromTree(es2017ModulesAndTypes);
+    let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
     let es5Amd = toNamedAmd(es5Modules);
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
 
-    trees.push(funnel(typings, {
-      destDir: 'typings',
-      annotation: 'typings'
+    trees.push(funnel(types, {
+      destDir: 'types',
+      annotation: 'types'
     }));
     trees.push(funnel(es2017Modules, {
       destDir: 'modules/es2017',
@@ -141,7 +141,7 @@ function compileTS(tsconfigFile, projectPath, tsinclude) {
   return compiledTS;
 }
 
-function selectTypingsFromTree(tree) {
+function selectTypesFromTree(tree) {
   return funnel(tree, { include: ['**/*.d.ts'] });
 }
 
