@@ -53,6 +53,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
-    "mocha-eslint": "^3.0.1"
+    "rimraf": "^2.5.4"
   }
 }
