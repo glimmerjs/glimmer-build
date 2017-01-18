@@ -9,41 +9,72 @@ const rimrafSync = require('rimraf').sync;
 const NODE_MODULES_PATH = path.join(__dirname, '../node_modules');
 
 describe('find-lib', function() {
-  describe('when module is not defined in package.json', function() {
+  describe('when `main` is defined in package.json', function() {
     beforeEach(function() {
-      setupFakePackage({ main: 'lib/whatever.js' });
+      setupFakePackage({ main: 'dist/whatever.js' });
     });
 
     afterEach(function() {
       teardownFakePackage();
     });
 
-    it('finds directory for given dependency', function() {
+    it('finds directory of the `main` file of the given dependency', function() {
       let foundLib = findLib('foo');
 
-      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'lib'));
+      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'dist'));
     });
 
-    it('finds directory for given dependency with optional libPath', function() {
+    it('finds directory of given dependency with optional libPath', function() {
       let foundLib = findLib('foo', 'bar');
 
       expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'bar'));
     });
   });
 
-  describe('when module is defined in package.json', function() {
+  describe('when `module` is defined in package.json', function() {
     beforeEach(function() {
-      setupFakePackage({ module: 'dist/whatever.js' });
+      setupFakePackage({ module: 'lib/whatever.js' });
     });
 
     afterEach(function() {
       teardownFakePackage();
     });
 
-    it('finds module directory for given dependency when module is defined in package.json', function() {
+    it('finds directory of the `module` file of the given dependency', function() {
       let foundLib = findLib('foo');
 
-      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'dist'));
+      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'lib'));
+    });
+
+    it('finds directory of given dependency with optional libPath', function() {
+      let foundLib = findLib('foo', 'bar');
+
+      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'bar'));
+    });
+  });
+
+  describe('when `main` and `module` are defined in package.json', function() {
+    beforeEach(function() {
+      setupFakePackage({
+        main: 'dist/whatever.js',
+        module: 'lib/whatever.js'
+      });
+    });
+
+    afterEach(function() {
+      teardownFakePackage();
+    });
+
+    it('finds directory of the `module` file of the given dependency', function() {
+      let foundLib = findLib('foo');
+
+      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'lib'));
+    });
+
+    it('finds directory of given dependency with optional libPath', function() {
+      let foundLib = findLib('foo', 'bar');
+
+      expect(foundLib).to.eq(path.join(NODE_MODULES_PATH, 'foo', 'bar'));
     });
   });
 });
