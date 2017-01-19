@@ -9,6 +9,9 @@
     "Kris Selden <kris.selden@gmail.com>"
   ],
   "license": "MIT",
+  "scripts": {
+    "test": "mocha test/*"
+  },
   "dependencies": {
     "@types/qunit": "^1.16.30",
     "amd-name-resolver": "0.0.6",
@@ -46,5 +49,11 @@
     "testem": "^1.13.0",
     "tslint": "^3.15.1",
     "typescript": "^2.1.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "fixturify": "^0.3.2",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.5.4"
   }
 }
