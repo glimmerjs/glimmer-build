@@ -29,15 +29,7 @@ module.exports = function(options) {
 
   let trees = [];
 
-  let tsinclude = [
-    'src/**',
-    'lib.*.d.ts'
-  ];
-
   if (env === 'tests') {
-    tsinclude.push('test/**');
-    tsinclude.push('node_modules/@types/**/*.ts');
-
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
       annotation: 'loader.js'
@@ -73,9 +65,9 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    trees.push(compileTS('tsconfig.tests.json', projectPath, tsinclude));
+    trees.push(compileTS('tsconfig.tests.json', projectPath));
   } else {
-    let es2017ModulesAndTypes = compileTS('tsconfig.json', projectPath, tsinclude);
+    let es2017ModulesAndTypes = compileTS('tsconfig.json', projectPath);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
@@ -113,7 +105,7 @@ module.exports = function(options) {
   return mergeTrees(trees);
 };
 
-function compileTS(tsconfigFile, projectPath, tsinclude) {
+function compileTS(tsconfigFile, projectPath) {
   let tsconfig = JSON.parse(fs.readFileSync(tsconfigFile));
 
   if (tsconfig.compilerOptions.outFile) {
@@ -129,7 +121,6 @@ function compileTS(tsconfigFile, projectPath, tsinclude) {
   });
 
   let ts = funnel(mergeTrees([libs, projectPath]), {
-    include: tsinclude,
     annotation: 'raw source'
   });
 
