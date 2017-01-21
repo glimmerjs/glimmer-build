@@ -15,6 +15,7 @@ const toNamedAmd = require('./lib/to-named-amd');
 const toNamedCommonJs = require('./lib/to-named-common-js');
 const toES5 = require('./lib/to-es5');
 const helpers = require('./lib/generate-helpers');
+const path = require('path');
 
 module.exports = function(options) {
   options = options || {};
@@ -48,7 +49,7 @@ module.exports = function(options) {
       annotation: 'test/qunit.{js|css}'
     }));
 
-    trees.push(funnel('./node_modules/@glimmer/build/test-support', {
+    trees.push(funnel(path.join(__dirname, 'test-support'), {
       include: [
         'test-loader.js',
         'index.html'
@@ -60,14 +61,14 @@ module.exports = function(options) {
     trees.push(babelHelpers);
 
     let vendorFiles = [
-      'node_modules/@glimmer/build/test-support/loader-no-conflict.js'
+      path.join(__dirname, 'test-support/loader-no-conflict.js')
     ];
 
     if (options.testDependencies) {
       Array.prototype.push.apply(vendorFiles, options.testDependencies);
     };
 
-    trees.push(concat('./', {
+    trees.push(concat('/', {
       inputFiles: vendorFiles,
       outputFile: 'vendor.js',
       annotation: 'vendor.js'
