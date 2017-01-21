@@ -59,7 +59,7 @@ module.exports = function(options) {
     };
 
     trees.push(concat('/', {
-      inputFiles: vendorFiles,
+      headerFiles: vendorFiles,
       outputFile: 'vendor.js',
       annotation: 'vendor.js'
     }));
