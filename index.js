@@ -1,21 +1,19 @@
 "use strict";
 
-const typescript = require('broccoli-typescript-compiler').typescript;
-const mergeTrees = require('broccoli-merge-trees');
 const assert = require('assert');
-const funnel = require('broccoli-funnel');
+const compileTypescript = require('./lib/compile-typescript');
 const concat = require('broccoli-concat');
-const fs = require('fs');
-const replace = require('broccoli-string-replace');
-const writeFile = require('broccoli-file-creator');
-const findLib = require('./lib/find-lib');
+const funnel = require('broccoli-funnel');
 const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
+const helpers = require('./lib/generate-helpers');
+const mergeTrees = require('broccoli-merge-trees');
+const path = require('path');
+const replace = require('broccoli-string-replace');
+const toES5 = require('./lib/to-es5');
 const toNamedAmd = require('./lib/to-named-amd');
 const toNamedCommonJs = require('./lib/to-named-common-js');
-const toES5 = require('./lib/to-es5');
-const helpers = require('./lib/generate-helpers');
-const path = require('path');
+const writeFile = require('broccoli-file-creator');
 
 module.exports = function(options) {
   options = options || {};
@@ -30,15 +28,7 @@ module.exports = function(options) {
 
   let trees = [];
 
-  let tsinclude = [
-    'src/**',
-    'lib.*.d.ts'
-  ];
-
   if (env === 'tests') {
-    tsinclude.push('test/**');
-    tsinclude.push('node_modules/@types/**/*.ts');
-
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
       annotation: 'loader.js'
@@ -74,9 +64,9 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    trees.push(compileTS('tsconfig.tests.json', projectPath, tsinclude));
+    trees.push(compileTypescript('tsconfig.tests.json', projectPath));
   } else {
-    let es2017ModulesAndTypes = compileTS('tsconfig.json', projectPath, tsinclude);
+    let es2017ModulesAndTypes = compileTypescript('tsconfig.json', projectPath);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
@@ -114,44 +104,10 @@ module.exports = function(options) {
   return mergeTrees(trees);
 };
 
-function compileTS(tsconfigFile, projectPath, tsinclude) {
-  let tsconfig = JSON.parse(fs.readFileSync(tsconfigFile));
-
-  if (tsconfig.compilerOptions.outFile) {
-    tsconfig.compilerOptions.outFile = removeFirstPathSegment(tsconfig.compilerOptions.outFile);
-  }
-
-  if (tsconfig.compilerOptions.outDir) {
-    tsconfig.compilerOptions.outDir = removeFirstPathSegment(tsconfig.compilerOptions.outDir);
-  }
-
-  let libs = funnel(findLib('typescript'), {
-    include: ['lib.*.d.ts']
-  });
-
-  let ts = funnel(mergeTrees([libs, projectPath]), {
-    include: tsinclude,
-    annotation: 'raw source'
-  });
-
-  let compiledTS = typescript(ts, {
-    tsconfig,
-    annotation: 'compiled source'
-  });
-
-  return compiledTS;
-}
-
 function selectTypesFromTree(tree) {
   return funnel(tree, { include: ['**/*.d.ts'] });
 }
 
 function filterTypescriptFromTree(tree) {
   return funnel(tree, { exclude: ['**/*.ts'] });
-}
-
-function removeFirstPathSegment(path) {
-  let parts = path.split('\/');
-  parts.shift();
-  return parts.join('\/');
 }
