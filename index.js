@@ -8,6 +8,7 @@ const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
 const helpers = require('./lib/generate-helpers');
 const mergeTrees = require('broccoli-merge-trees');
+const path = require('path');
 const replace = require('broccoli-string-replace');
 const toES5 = require('./lib/to-es5');
 const toNamedAmd = require('./lib/to-named-amd');
@@ -38,7 +39,7 @@ module.exports = function(options) {
       annotation: 'test/qunit.{js|css}'
     }));
 
-    trees.push(funnel('./node_modules/@glimmer/build/test-support', {
+    trees.push(funnel(path.join(__dirname, 'test-support'), {
       include: [
         'test-loader.js',
         'index.html'
@@ -50,14 +51,14 @@ module.exports = function(options) {
     trees.push(babelHelpers);
 
     let vendorFiles = [
-      'node_modules/@glimmer/build/test-support/loader-no-conflict.js'
+      path.join(__dirname, 'test-support/loader-no-conflict.js')
     ];
 
     if (options.testDependencies) {
       Array.prototype.push.apply(vendorFiles, options.testDependencies);
     };
 
-    trees.push(concat('./', {
+    trees.push(concat('/', {
       inputFiles: vendorFiles,
       outputFile: 'vendor.js',
       annotation: 'vendor.js'
