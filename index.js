@@ -50,17 +50,20 @@ module.exports = function(options) {
     let babelHelpers = writeFile('babel-helpers.js', helpers('amd'));
     trees.push(babelHelpers);
 
-    let vendorFiles = [
-      path.join(__dirname, 'test-support/loader-no-conflict.js')
+    let vendorTrees = options.vendorTrees || [];
+
+    vendorTrees = [
+      funnel(path.join(__dirname, 'test-support'), { include: ['loader-no-conflict.js'] })
     ];
 
-    if (options.testDependencies) {
-      Array.prototype.push.apply(vendorFiles, options.testDependencies);
+    if (options.vendorTrees) {
+      Array.prototype.push.apply(vendorTrees, options.vendorTrees);
     };
 
-    trees.push(concat('/', {
-      headerFiles: vendorFiles,
+    trees.push(concat(mergeTrees(vendorTrees), {
+      inputFiles: ['**/*'],
       outputFile: 'vendor.js',
+      sourceMapConfig: { enabled: false },
       annotation: 'vendor.js'
     }));
 
