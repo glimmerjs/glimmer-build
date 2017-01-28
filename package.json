@@ -1,6 +1,6 @@
 {
   "name": "@glimmer/build",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Build tooling for Glimmer packages.",
   "main": "index.js",
   "contributors": [
