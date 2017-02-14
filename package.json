@@ -12,6 +12,11 @@
   "scripts": {
     "test": "mocha test/*"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glimmerjs/glimmer-build"
+  },
+  "homepage": "https://github.com/glimmerjs/glimmer-build",
   "dependencies": {
     "@types/qunit": "^1.16.30",
     "amd-name-resolver": "0.0.6",
