@@ -67,7 +67,16 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    trees.push(compileTypescript('tsconfig.tests.json', projectPath));
+    let compiledTypescript = compileTypescript('tsconfig.tests.json', projectPath);
+    let es2017Modules = filterTypescriptFromTree(compiledTypescript);
+    let es5Modules = toES5(es2017Modules);
+    let es5Amd = funnel(toNamedAmd(es5Modules), {
+      srcDir: projectName
+    });
+
+    trees.push(concat(es5Amd, {
+      outputFile: 'tests.js'
+    }));
   } else {
     let es2017ModulesAndTypes = compileTypescript('tsconfig.json', projectPath);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
