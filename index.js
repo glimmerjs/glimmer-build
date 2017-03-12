@@ -19,16 +19,20 @@ module.exports = function(options) {
   options = options || {};
 
   let env = process.env.BROCCOLI_ENV;
-  let projectPath = process.cwd();
+  let isTest = env === 'tests';
+
+  let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
+  let tsconfigPath = options.tsconfigPath || (isTest ? 'tsconfig.tests.json' : 'tsconfig.json');
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
   console.log('Build path:', projectPath);
+  console.log('Build tsconfig: ', tsconfigPath);
 
   let trees = [];
 
-  if (env === 'tests') {
+  if (isTest) {
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
       annotation: 'loader.js'
@@ -67,7 +71,7 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    let compiledTypescript = compileTypescript('tsconfig.tests.json', projectPath);
+    let compiledTypescript = compileTypescript(tsconfigPath, projectPath);
     let es2017Modules = filterTypescriptFromTree(compiledTypescript);
     let es5Modules = toES5(es2017Modules);
     let es5Amd = funnel(toNamedAmd(es5Modules), {
@@ -78,11 +82,11 @@ module.exports = function(options) {
       outputFile: 'tests.js'
     }));
   } else {
-    let es2017ModulesAndTypes = compileTypescript('tsconfig.json', projectPath);
+    let es2017ModulesAndTypes = compileTypescript(tsconfigPath, projectPath);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
-    let es5Amd = toNamedAmd(es5Modules);
+    let es5Amd = toNamedAmd(es5Modules, projectName);
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
 
