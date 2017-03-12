@@ -21,7 +21,7 @@ module.exports = function(options) {
   let env = process.env.BROCCOLI_ENV;
   let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
-  let tsconfigPath = options.tsconfigPath || projectPath + '/tsconfig.json';
+  let tsconfigPath = options.tsconfigPath || 'tsconfig.json';
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
