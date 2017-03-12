@@ -19,12 +19,14 @@ module.exports = function(options) {
   options = options || {};
 
   let env = process.env.BROCCOLI_ENV;
-  let projectPath = process.cwd();
+  let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
+  let tsconfigPath = options.tsconfigPath || projectPath + '/tsconfig.json';
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
   console.log('Build path:', projectPath);
+  console.log('Build tsconfig: ', tsconfigPath);
 
   let trees = [];
 
@@ -78,11 +80,11 @@ module.exports = function(options) {
       outputFile: 'tests.js'
     }));
   } else {
-    let es2017ModulesAndTypes = compileTypescript('tsconfig.json', projectPath);
+    let es2017ModulesAndTypes = compileTypescript(tsconfigPath, projectPath);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
-    let es5Amd = toNamedAmd(es5Modules);
+    let es5Amd = toNamedAmd(es5Modules, projectName);
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
 
