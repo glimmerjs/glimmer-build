@@ -19,9 +19,11 @@ module.exports = function(options) {
   options = options || {};
 
   let env = process.env.BROCCOLI_ENV;
+  let isTest = env === 'tests';
+
   let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
-  let tsconfigPath = options.tsconfigPath || 'tsconfig.json';
+  let tsconfigPath = options.tsconfigPath || (isTest ? 'tsconfig.tests.json' : 'tsconfig.json');
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
@@ -30,7 +32,7 @@ module.exports = function(options) {
 
   let trees = [];
 
-  if (env === 'tests') {
+  if (isTest) {
     trees.push(funnelLib('loader.js', {
       include: ['loader.js'],
       annotation: 'loader.js'
@@ -69,7 +71,7 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    let compiledTypescript = compileTypescript('tsconfig.tests.json', projectPath);
+    let compiledTypescript = compileTypescript(tsconfigPath, projectPath);
     let es2017Modules = filterTypescriptFromTree(compiledTypescript);
     let es5Modules = toES5(es2017Modules);
     let es5Amd = funnel(toNamedAmd(es5Modules), {
