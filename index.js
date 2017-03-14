@@ -82,7 +82,11 @@ module.exports = function(options) {
       outputFile: 'tests.js'
     }));
   } else {
-    let es2017ModulesAndTypes = compileTypescript(tsconfigPath, projectPath);
+    let es2017ModulesAndTypes = compileTypescript({
+      tsconfigPath,
+      projectPath,
+      include: options.include
+    });
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
