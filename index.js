@@ -18,8 +18,8 @@ const writeFile = require('broccoli-file-creator');
 module.exports = function(options) {
   options = options || {};
 
-  let env = process.env.BROCCOLI_ENV;
-  let isTest = env === 'tests';
+  let env = process.env.EMBER_ENV || process.env.BROCCOLI_ENV;
+  let isTest = isTestBuild();
 
   let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
@@ -126,4 +126,8 @@ function selectTypesFromTree(tree) {
 
 function filterTypescriptFromTree(tree) {
   return funnel(tree, { exclude: ['**/*.ts'] });
+}
+
+function isTestBuild() {
+  return process.env.EMBER_ENV === 'test' || process.env.BROCCOLI_ENV === 'tests';
 }
