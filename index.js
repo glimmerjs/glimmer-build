@@ -15,9 +15,7 @@ const toNamedAmd = require('./lib/to-named-amd');
 const toNamedCommonJs = require('./lib/to-named-common-js');
 const writeFile = require('broccoli-file-creator');
 
-module.exports = function(options) {
-  options = options || {};
-
+module.exports = function(options = {}) {
   let env = process.env.EMBER_ENV || process.env.BROCCOLI_ENV;
   let isTest = isTestBuild();
 
