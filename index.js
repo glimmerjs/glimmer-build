@@ -71,7 +71,14 @@ module.exports = function(options) {
       annotation: 'vendor.js'
     }));
 
-    let compiledTypescript = compileTypescript(tsconfigPath, projectPath);
+    let compiledTypescript = compileTypescript(
+      tsconfigPath, 
+      projectPath,
+      options.include || [
+        'src/**/*.ts',
+        'test/**/*.ts'
+      ]
+    );
     let es2017Modules = filterTypescriptFromTree(compiledTypescript);
     let es5Modules = toES5(es2017Modules);
     let es5Amd = funnel(toNamedAmd(es5Modules), {
@@ -82,7 +89,13 @@ module.exports = function(options) {
       outputFile: 'tests.js'
     }));
   } else {
-    let es2017ModulesAndTypes = compileTypescript(tsconfigPath, projectPath);
+    let es2017ModulesAndTypes = compileTypescript(
+      tsconfigPath,
+      projectPath,
+      options.include || [
+        'src/**/*.ts'
+      ]
+    );
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
