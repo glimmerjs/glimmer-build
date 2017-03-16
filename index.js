@@ -6,7 +6,6 @@ const concat = require('broccoli-concat');
 const funnel = require('broccoli-funnel');
 const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
-const helpers = require('./lib/generate-helpers');
 const mergeTrees = require('broccoli-merge-trees');
 const path = require('path');
 const replace = require('broccoli-string-replace');
@@ -48,9 +47,6 @@ module.exports = function(options = {}) {
       ],
       annotation: 'test-support'
     }));
-
-    let babelHelpers = writeFile('babel-helpers.js', helpers('amd'));
-    trees.push(babelHelpers);
 
     let vendorTrees = options.vendorTrees || [];
 
