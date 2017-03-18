@@ -3,6 +3,7 @@
 const assert = require('assert');
 const compileTypescript = require('./lib/compile-typescript');
 const concat = require('broccoli-concat');
+const fs = require('fs');
 const funnel = require('broccoli-funnel');
 const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
@@ -12,7 +13,9 @@ const replace = require('broccoli-string-replace');
 const toES5 = require('./lib/to-es5');
 const toNamedAmd = require('./lib/to-named-amd');
 const toNamedCommonJs = require('./lib/to-named-common-js');
+const buildTestsIndex = require('./lib/build-tests-index');
 const writeFile = require('broccoli-file-creator');
+const packageDist = require('./lib/package-dist');
 
 module.exports = function(options = {}) {
   let env = process.env.EMBER_ENV || process.env.BROCCOLI_ENV;
@@ -21,6 +24,8 @@ module.exports = function(options = {}) {
   let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
   let tsconfigPath = options.tsconfigPath || (isTest ? 'tsconfig.tests.json' : 'tsconfig.json');
+  let vendorPackages = options.vendorPackages;
+  let external = options.external || vendorPackages || [];
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
@@ -48,52 +53,88 @@ module.exports = function(options = {}) {
       annotation: 'test-support'
     }));
 
-    let vendorTrees = options.vendorTrees || [];
+    let vendorTrees = options.vendorTrees;
+    if (!vendorTrees) {
+      vendorTrees = vendorPackages ? vendorPackages.map(packageDist) : [];
+    }
 
-    vendorTrees = [
-      funnel(path.join(__dirname, 'test-support'), { include: ['loader-no-conflict.js'] })
-    ];
+    let vendorFile;
+    if (vendorTrees.length > 0) {
+      vendorFile = concat(mergeTrees(vendorTrees), {
+        inputFiles: ['**/*'],
+        outputFile: 'vendor.js',
+        sourceMapConfig: { enabled: false },
+        annotation: 'vendor.js'
+      });
+    } else {
+      vendorFile = writeFile('vendor.js', '');
+    }
+    trees.push(vendorFile);
 
-    if (options.vendorTrees) {
-      Array.prototype.push.apply(vendorTrees, options.vendorTrees);
-    };
+    let srcTrees = options.srcTrees;
+    let jsTrees = [];
+    if (!srcTrees) {
+      let srcPath = path.join(projectPath, 'src'); 
+      let testPath = path.join(projectPath, 'test');  
+      if (fs.existsSync(srcPath) && fs.existsSync(testPath)) {
+        let testsIndex = buildTestsIndex('test', 'index.ts');
+        srcTrees = [];
+        srcTrees.push(funnel(srcPath, { destDir: 'src' }));
+        srcTrees.push(funnel(testPath, { destDir: 'test' }));
+        srcTrees.push(funnel(testsIndex, { destDir: 'test' }));
 
-    trees.push(concat(mergeTrees(vendorTrees), {
-      inputFiles: ['**/*'],
-      outputFile: 'vendor.js',
-      sourceMapConfig: { enabled: false },
-      annotation: 'vendor.js'
-    }));
+        jsTrees.push(funnel(srcPath, { 
+          destDir: 'src',
+          include: ['**/*.js']
+        }));
+        jsTrees.push(funnel(testPath, { 
+          destDir: 'test',
+          include: ['**/*.js']
+        }));
+      }
+    }
 
     let compiledTypescript = compileTypescript(
       tsconfigPath, 
       projectPath,
-      options.include || [
-        'src/**/*.ts',
-        'test/**/*.ts'
-      ]
+      srcTrees
     );
-    let es2017Modules = filterTypescriptFromTree(compiledTypescript);
-    let es5Modules = toES5(es2017Modules);
-    let es5Amd = funnel(toNamedAmd(es5Modules), {
-      srcDir: projectName
-    });
 
-    trees.push(concat(es5Amd, {
-      outputFile: 'tests.js'
-    }));
+    jsTrees.push(filterTypescriptFromTree(compiledTypescript));
+    let es2017Modules = mergeTrees(jsTrees);
+    let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
+    let es5Amd = toNamedAmd(es5Modules, { 
+      dest: 'tests.js',
+      namespace: 'tests',
+      entry: path.join('tests', 'test', 'index.js'),
+      external
+    });
+    trees.push(es5Amd);
   } else {
+    let srcTrees = options.srcTrees;
+    let jsTrees = [];
+    if (!srcTrees) {
+      let srcPath = path.join(projectPath, 'src'); 
+      if (fs.existsSync(srcPath)) {
+        srcTrees = [funnel(srcPath, { destDir: 'src' })];
+        jsTrees.push(funnel(srcPath, { 
+          destDir: 'src',
+          include: ['**/*.js']
+        }));
+      }
+    }
+
     let es2017ModulesAndTypes = compileTypescript(
       tsconfigPath,
       projectPath,
-      options.include || [
-        'src/**/*.ts'
-      ]
+      srcTrees
     );
+
+    jsTrees.push(filterTypescriptFromTree(es2017ModulesAndTypes));
+    let es2017Modules = mergeTrees(jsTrees);
     let types = selectTypesFromTree(es2017ModulesAndTypes);
-    let es2017Modules = filterTypescriptFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
-    let es5Amd = toNamedAmd(es5Modules, projectName);
+    let es5Amd = toNamedAmd(es5Modules, { namespace: projectName, external });
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
 
@@ -109,11 +150,7 @@ module.exports = function(options = {}) {
       destDir: 'modules/es5',
       annotation: 'modules-es5'
     }));
-    trees.push(funnel(es5Amd, {
-      srcDir: projectName,
-      destDir: 'amd/es5',
-      annotation: 'amd-es5'
-    }));
+    trees.push(es5Amd);
     trees.push(funnel(es2017CommonJs, {
       destDir: 'commonjs/es2017',
       annotation: 'commonjs-es2017'
