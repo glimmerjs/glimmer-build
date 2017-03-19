@@ -103,12 +103,14 @@ module.exports = function(options = {}) {
     jsTrees.push(filterTypescriptFromTree(compiledTypescript));
     let es2017Modules = mergeTrees(jsTrees);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
-    let es5Amd = toNamedAmd(es5Modules, { 
+    let es5TestAmd = toNamedAmd(es5Modules, { 
       dest: 'tests.js',
-      namespace: 'tests',
-      entry: path.join('tests', 'test', 'index.js'),
+      namespace: projectName+'-tests',
+      entry: path.join(projectName + '-tests', 'test', 'index.js'),
       external
     });
+    trees.push(es5TestAmd);
+    let es5Amd = toNamedAmd(es5Modules, { namespace: projectName, external });
     trees.push(es5Amd);
   } else {
     let srcTrees = options.srcTrees;
