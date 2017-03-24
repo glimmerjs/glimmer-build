@@ -23,7 +23,7 @@
     "babel-generator": "^6.19.0",
     "babel-helpers": "^6.16.0",
     "babel-plugin-check-es2015-constants": "^6.8.0",
-    "babel-plugin-external-helpers-2": "^6.3.13",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-feature-flags": "^0.3.0",
     "babel-plugin-filter-imports": "~0.3.0",
     "babel-plugin-transform-es2015-arrow-functions": "^6.8.0",
