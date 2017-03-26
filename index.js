@@ -26,6 +26,8 @@ module.exports = function(options = {}) {
   let tsconfigPath = options.tsconfigPath || (isTest ? 'tsconfig.tests.json' : 'tsconfig.json');
   let vendorPackages = options.vendorPackages;
   let external = options.external || vendorPackages || [];
+  let testOptions = options.test || {};
+  let useES5 = testOptions.es5 === undefined || testOptions.es5;
 
   console.log('Build project:', projectName);
   console.log('Build env:', env);
@@ -74,8 +76,8 @@ module.exports = function(options = {}) {
     let srcTrees = options.srcTrees;
     let jsTrees = [];
     if (!srcTrees) {
-      let srcPath = path.join(projectPath, 'src'); 
-      let testPath = path.join(projectPath, 'test');  
+      let srcPath = path.join(projectPath, 'src');
+      let testPath = path.join(projectPath, 'test');
       if (fs.existsSync(srcPath) && fs.existsSync(testPath)) {
         let testsIndex = buildTestsIndex('test', 'index.ts');
         srcTrees = [];
@@ -83,11 +85,11 @@ module.exports = function(options = {}) {
         srcTrees.push(funnel(testPath, { destDir: 'test' }));
         srcTrees.push(funnel(testsIndex, { destDir: 'test' }));
 
-        jsTrees.push(funnel(srcPath, { 
+        jsTrees.push(funnel(srcPath, {
           destDir: 'src',
           include: ['**/*.js']
         }));
-        jsTrees.push(funnel(testPath, { 
+        jsTrees.push(funnel(testPath, {
           destDir: 'test',
           include: ['**/*.js']
         }));
@@ -95,29 +97,31 @@ module.exports = function(options = {}) {
     }
 
     let compiledTypescript = compileTypescript(
-      tsconfigPath, 
+      tsconfigPath,
       projectPath,
       srcTrees
     );
 
     jsTrees.push(filterTypescriptFromTree(compiledTypescript));
-    let es2017Modules = mergeTrees(jsTrees);
-    let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
-    let es5Amd = toNamedAmd(es5Modules, { 
+    let modules = mergeTrees(jsTrees);
+    if (useES5) {
+      modules = toES5(modules, { sourceMap: 'inline' });
+    }
+    let amd = toNamedAmd(modules, {
       dest: 'tests.js',
       namespace: 'tests',
       entry: path.join('tests', 'test', 'index.js'),
       external
     });
-    trees.push(es5Amd);
+    trees.push(amd);
   } else {
     let srcTrees = options.srcTrees;
     let jsTrees = [];
     if (!srcTrees) {
-      let srcPath = path.join(projectPath, 'src'); 
+      let srcPath = path.join(projectPath, 'src');
       if (fs.existsSync(srcPath)) {
         srcTrees = [funnel(srcPath, { destDir: 'src' })];
-        jsTrees.push(funnel(srcPath, { 
+        jsTrees.push(funnel(srcPath, {
           destDir: 'src',
           include: ['**/*.js']
         }));
