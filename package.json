@@ -3,6 +3,13 @@
   "version": "0.6.3",
   "description": "Build tooling for Glimmer packages.",
   "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "contributors": [
     "Dan Gebhardt <dan@cerebris.com>",
     "Tom Dale <tom@tomdale.net>",
