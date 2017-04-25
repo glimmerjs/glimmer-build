@@ -16,6 +16,8 @@ const toNamedCommonJs = require('./lib/to-named-common-js');
 const buildTestsIndex = require('./lib/build-tests-index');
 const writeFile = require('broccoli-file-creator');
 const packageDist = require('./lib/package-dist');
+const envFlags = require('./lib/default-es5-plugins').envFlags;
+const Babel = require('broccoli-babel-transpiler');
 
 module.exports = function(options = {}) {
   let env = process.env.EMBER_ENV || process.env.BROCCOLI_ENV;
@@ -135,7 +137,9 @@ module.exports = function(options = {}) {
     );
 
     jsTrees.push(filterTypescriptFromTree(es2017ModulesAndTypes));
-    let es2017Modules = mergeTrees(jsTrees);
+    let es2017Modules = new Babel(mergeTrees(jsTrees), {
+      plugins: [envFlags()]
+    });
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
     let es5Amd = toNamedAmd(es5Modules, { namespace: projectName, external });
