@@ -56,7 +56,7 @@
     "broccoli-merge-trees": "^1.2.1",
     "broccoli-rollup": "^1.0.3",
     "broccoli-string-replace": "^0.1.1",
-    "broccoli-typescript-compiler": "next",
+    "broccoli-typescript-compiler": "2.0.0-beta.1",
     "loader.js": "^4.0.11",
     "qunitjs": "^2.3.3",
     "resolve": "^1.3.2",
