@@ -805,7 +805,7 @@ broccoli-string-replace@^0.1.1:
     broccoli-persistent-filter "^1.1.5"
     minimatch "^3.0.3"
 
-broccoli-typescript-compiler@next:
+broccoli-typescript-compiler@2.0.0-beta.1:
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/broccoli-typescript-compiler/-/broccoli-typescript-compiler-2.0.0-beta.1.tgz#42ffa780079bb6363fccabd6d16eb06328ea2a53"
   dependencies:
