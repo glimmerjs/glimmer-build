@@ -44,7 +44,7 @@ module.exports = function(options = {}) {
       annotation: 'loader.js'
     }));
 
-    trees.push(funnelLib('qunitjs', {
+    trees.push(funnelLib('qunit', {
       include: ['qunit.js', 'qunit.css'],
       annotation: 'test/qunit.{js|css}'
     }));
