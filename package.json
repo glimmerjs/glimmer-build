@@ -56,14 +56,14 @@
     "broccoli-merge-trees": "^1.2.1",
     "broccoli-rollup": "^1.0.3",
     "broccoli-string-replace": "^0.1.1",
-    "broccoli-typescript-compiler": "2.0.0-beta.1",
+    "broccoli-typescript-compiler": "2.1.1",
     "loader.js": "^4.0.11",
     "qunit": "^2.4.1",
     "resolve": "^1.3.2",
     "stack-trace": "^0.0.9",
     "testem": "^1.13.0",
-    "tslint": "^3.15.1",
-    "typescript": "^2.1.5"
+    "tslint": "^5.9.1",
+    "typescript": "~2.6.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
