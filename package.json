@@ -8,7 +8,8 @@
   },
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "test-support"
   ],
   "contributors": [
     "Dan Gebhardt <dan@cerebris.com>",
