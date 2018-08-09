@@ -15,6 +15,8 @@ const TMP_DIR = path.join(__dirname, '../tmp/compile-typescript');
 let builder;
 
 describe('compile-typescript', function() {
+  this.timeout(5000);
+
   afterEach(function() {
     teardown();
   });
