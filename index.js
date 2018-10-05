@@ -21,7 +21,7 @@ const Babel = require('broccoli-babel-transpiler');
 
 module.exports = function(options = {}) {
   let env = process.env.EMBER_ENV || process.env.BROCCOLI_ENV;
-  let isTest = isTestBuild();
+  let isTest = isTestBuild(options);
 
   let projectPath = options.projectPath || process.cwd();
   let projectName = getPackageName(projectPath);
@@ -107,7 +107,7 @@ module.exports = function(options = {}) {
     jsTrees.push(filterTypescriptFromTree(compiledTypescript));
     let modules = mergeTrees(jsTrees);
     if (useES5) {
-      modules = toES5(modules, { sourceMap: 'inline' });
+      modules = toES5(modules, { sourceMap: 'inline'}, options.buildType);
     }
     let amd = toNamedAmd(modules, {
       dest: 'tests.js',
@@ -138,10 +138,10 @@ module.exports = function(options = {}) {
 
     jsTrees.push(filterTypescriptFromTree(es2017ModulesAndTypes));
     let es2017Modules = new Babel(mergeTrees(jsTrees), {
-      plugins: [envFlags()]
+      plugins: [envFlags(options.buildType || process.env.EMBER_ENV)]
     });
     let types = selectTypesFromTree(es2017ModulesAndTypes);
-    let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' });
+    let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' }, options.buildType);
     let es5Amd = toNamedAmd(es5Modules, { namespace: projectName, external });
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
@@ -180,6 +180,9 @@ function filterTypescriptFromTree(tree) {
   return funnel(tree, { exclude: ['**/*.ts'] });
 }
 
-function isTestBuild() {
+function isTestBuild(options) {
+  if (options.buildType) {
+    return options.buildType === 'test';
+  }
   return process.env.EMBER_ENV === 'test' || process.env.BROCCOLI_ENV === 'tests';
 }
