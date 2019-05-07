@@ -1,6 +1,5 @@
 "use strict";
 
-const assert = require('assert');
 const compileTypescript = require('./lib/compile-typescript');
 const concat = require('broccoli-concat');
 const fs = require('fs');
@@ -9,7 +8,6 @@ const funnelLib = require('./lib/funnel-lib');
 const getPackageName = require('./lib/get-package-name');
 const mergeTrees = require('broccoli-merge-trees');
 const path = require('path');
-const replace = require('broccoli-string-replace');
 const toES5 = require('./lib/to-es5');
 const toNamedAmd = require('./lib/to-named-amd');
 const toNamedCommonJs = require('./lib/to-named-common-js');
@@ -138,7 +136,7 @@ module.exports = function(options = {}) {
 
     jsTrees.push(filterTypescriptFromTree(es2017ModulesAndTypes));
     let es2017Modules = new Babel(mergeTrees(jsTrees), {
-      plugins: [envFlags(options.buildType || process.env.EMBER_ENV)]
+      plugins: [envFlags(options.buildType || env)]
     });
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' }, options.buildType);
