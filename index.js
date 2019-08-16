@@ -141,6 +141,11 @@ module.exports = function(options = {}) {
     let types = selectTypesFromTree(es2017ModulesAndTypes);
     let es5Modules = toES5(es2017Modules, { sourceMap: 'inline' }, options.buildType);
     let es5Amd = toNamedAmd(es5Modules, { namespace: projectName, external });
+    let es2017Amd = toNamedAmd(es2017Modules, {
+      namespace: projectName,
+      external,
+      lang: 'es2017'
+    });
     let es2017CommonJs = toNamedCommonJs(es2017Modules);
     let es5CommonJs = toNamedCommonJs(es5Modules);
 
@@ -157,6 +162,7 @@ module.exports = function(options = {}) {
       annotation: 'modules-es5'
     }));
     trees.push(es5Amd);
+    trees.push(es2017Amd);
     trees.push(funnel(es2017CommonJs, {
       destDir: 'commonjs/es2017',
       annotation: 'commonjs-es2017'
